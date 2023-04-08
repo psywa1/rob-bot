@@ -14,15 +14,7 @@ module.exports = {
     },
   ],
 
-  async execute(interaction, player) {
-    console.log(player + "awdawd");
-    try {
-      await interaction.deferReply();
-    } catch (e) {
-      console.log(e);
-      interaction.followUp({
-        content: "Error executing that command: " + e.message,
-      });
-    }
+  async execute(interaction) {
+    console.log(interaction + "awdawd");
   },
 };
