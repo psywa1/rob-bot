@@ -1,4 +1,4 @@
-require('dotenv').config({ path:'./.env' })
+require("dotenv").config({ path: "./.env" });
 
 const { Player } = require("discord-player");
 const { Client, GatewayIntentBits, Collection, Events } = require("discord.js");
@@ -30,10 +30,6 @@ for (const file of commandFiles) {
 const player = new Player(client);
 
 client.on("ready", async (c) => {
-  // client.guilds.cache.get("277106122824089601");
-  // await client.application?.fetch();
-  // console.log(client.guilds.cache.get("277106122824089601").members.cache);
-
   client.application.commands.set(CommandsArray);
   client.user.setActivity("Rob-Bot", { type: 2 });
   await client.guilds.cache
@@ -41,7 +37,7 @@ client.on("ready", async (c) => {
     .commands.set(client?.commands)
     .then(console.log(`${c.user.tag} is online`))
     .catch((err) => {
-      console.log("Error with setting commands");
+      console.log("Error with setting commands: " + err);
     });
 });
 
@@ -51,7 +47,12 @@ client.on("messageCreate", async (message) => {
 
 client.on(Events.InteractionCreate, async (interaction) => {
   const command = client.commands.get(interaction.commandName);
-  command.execute(client, interaction)
+  console.log(command.description);
+  if (command.description.includes("MusicPlayer")) {
+    command.execute(player, interaction);
+  } else {
+    command.execute(interaction);
+  }
 });
 
 client.login(process.env.TOKEN);

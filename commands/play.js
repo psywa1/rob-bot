@@ -3,7 +3,7 @@ const { ApplicationCommandOptionType } = require("discord.js");
 
 module.exports = {
   name: "play",
-  description: "Play a song!",
+  description: "Play a song! - MusicPlayer",
   voiceChannel: true,
   options: [
     {
@@ -14,7 +14,8 @@ module.exports = {
     },
   ],
 
-  async execute(interaction) {
-    console.log(interaction + "awdawd");
+  async execute(player, interaction) {
+    console.log(player)
+    await interaction.reply("Playing")
   },
 };

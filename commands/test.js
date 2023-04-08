@@ -1,7 +1,8 @@
 module.exports = {
     name: 'test',
     description: 'Test Command',
-    async execute(client, interaction) {
+    type: 1,
+    async execute(interaction) {
         await interaction.reply("Test Command")
     }
 }
