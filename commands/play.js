@@ -1,5 +1,5 @@
 const { QueryType } = require("discord-player");
-const { ApplicationCommandOptionType } = require("discord.js");
+const { ApplicationCommandOptionType, GuildMember } = require("discord.js");
 
 module.exports = {
   name: "play",
@@ -15,7 +15,55 @@ module.exports = {
   ],
 
   async execute(player, interaction) {
-    console.log(player)
-    await interaction.reply("Playing")
+    await interaction.deferReply();
+    const song = interaction.options.getString("song");
+    const searchResult = await player.search(song, {
+      requestedBy: interaction.member,
+      searchEngine: QueryType.AUTO,
+    });
+
+    if (!searchResult || !searchResult.tracks.length) {
+      return interaction.editReply({
+        content: `${song} - requested by - ${interaction.member} not found`,
+        epheremal: true,
+      });
+    }
+
+    const queue = await player.nodes.create(interaction.guild, {
+      ytdlOptions: {
+        quality: "highest",
+        filter: "audioonly",
+        highWaterMark: 1 << 25, 
+        dlChunkSize: 0,
+      },
+      metadata: interaction.channel,
+      spotifyBridge: true, 
+      volume: 50, 
+    }); 
+
+    try {
+      if (!queue.connection)
+        await queue.connect(interaction.member.voice.channel);
+    } catch {
+      await player.nodes.delete(interaction.guildId);
+      return interaction.editReply({
+        content: `Can't join the voice channel ${interaction.member}`,
+        ephemeral: true,
+      });
+    }
+
+    searchResult.playlist
+      ? queue.addTrack(searchResult.tracks)
+      : queue.addTrack(searchResult.tracks[0]);
+
+    if (!queue.node.isPlaying()) await queue.node.play();
+
+    await interaction.editReply({
+      content: `Queued ${searchResult.playlist ? "playlist" : "track"}:\n${
+        searchResult.tracks[0].title
+      } - (${searchResult.tracks[0].url})\nrequested by - ${
+        interaction.member
+      }`,
+    });
   },
 };

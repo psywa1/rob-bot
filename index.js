@@ -47,8 +47,25 @@ client.on("messageCreate", async (message) => {
 
 client.on(Events.InteractionCreate, async (interaction) => {
   const command = client.commands.get(interaction.commandName);
-  console.log(command.description);
   if (command.description.includes("MusicPlayer")) {
+    console.log("Music command")
+    if (!interaction.member.voice.channel) {
+      return void interaction.reply({
+        content: "You are not in a voice channel!",
+        ephemeral: true,
+      });
+    }
+    
+    if (
+      interaction.guild.members.me.voice.channelId &&
+      interaction.member.voice.channelId !==
+        interaction.guild.members.me.voice.channelId
+    ) {
+      return void interaction.reply({
+        content: "You are not in my voice channel!",
+        ephemeral: true,
+      });
+    }
     command.execute(player, interaction);
   } else {
     command.execute(interaction);
