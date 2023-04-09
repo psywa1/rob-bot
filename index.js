@@ -1,7 +1,14 @@
 require("dotenv").config({ path: "./.env" });
 
+const { channel } = require("diagnostics_channel");
 const { Player } = require("discord-player");
-const { Client, GatewayIntentBits, Collection, Events } = require("discord.js");
+const {
+  Client,
+  GatewayIntentBits,
+  Collection,
+  Events,
+  EmbedBuilder,
+} = require("discord.js");
 const fs = require("fs");
 
 const client = new Client({
@@ -48,14 +55,13 @@ client.on("messageCreate", async (message) => {
 client.on(Events.InteractionCreate, async (interaction) => {
   const command = client.commands.get(interaction.commandName);
   if (command.description.includes("MusicPlayer")) {
-    console.log("Music command")
     if (!interaction.member.voice.channel) {
       return void interaction.reply({
         content: "You are not in a voice channel!",
         ephemeral: true,
       });
     }
-    
+
     if (
       interaction.guild.members.me.voice.channelId &&
       interaction.member.voice.channelId !==
@@ -70,6 +76,24 @@ client.on(Events.InteractionCreate, async (interaction) => {
   } else {
     command.execute(interaction);
   }
+});
+
+player.events.on("playerStart", (queue, track) => {
+  client.channels
+    .fetch(queue.connection.packets.state.channel_id)
+    .then((channel) =>
+      queue.metadata.send(
+        // new EmbedBuilder()
+        //   .setTitle(`▶ | Started playing: [**${track.title}**]`)
+        //   .setURL(`${track.url}`)
+        //   .setDescription(`Audio playing in ${channel}*`)
+        `▶ | Started playing: **${track.title}** in **${channel}**!`
+      )
+    );
+});
+
+player.on("emptyQueue", (queue) => {
+  queue.metadata.send("Queue finished!");
 });
 
 client.login(process.env.TOKEN);

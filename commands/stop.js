@@ -5,7 +5,6 @@ module.exports = {
 
   async execute(player, interaction) {
     await interaction.deferReply();
-    console.log(player.nodes.get(interaction.guildId));
     const queue = await player.nodes.get(interaction.guildId);
 
     if (!queue || !queue.isPlaying())
